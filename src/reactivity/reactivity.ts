@@ -10,7 +10,6 @@ export function reactivity(row) {
     },
     set(target, key, value) {
       const ret = Reflect.set(target, key, value);
-      // TODO 触发依赖
       trigger(target, key);
       return ret;
     }

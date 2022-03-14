@@ -1,24 +1,25 @@
 class ReactivityEffect {
   private _fn: Function;
-
-  constructor(fn) {
+  constructor(fn, public scheduler?) {
     this._fn = fn;
+    this.scheduler = scheduler;
   }
 
   run() {
     activityEffect = this;
-    this._fn();
+    return this._fn();
   }
 }
 
 let activityEffect;
-export function effect(fn) {
-  const _effect = new ReactivityEffect(fn);
+export function effect(fn, option: any = {}) {
+  const _effect = new ReactivityEffect(fn, option?.scheduler);
   _effect.run();
+  return _effect.run.bind(_effect);
 }
 
 // 收集依赖
-// target -> key -> dep
+// targets -> keys -> dep
 // target可能会有n个key，所以把要target放到map中去。
 // 每个key会对应1个dep
 // dep下面会有n个effect，effect的数量取决于用户创建的数量
@@ -37,8 +38,6 @@ export function track(target, key) {
     depsMap.set(key, dep);
   }
   dep.add(activityEffect);
-  console.log('activityEffect', activityEffect);
-  
 }
 
 // 触发依赖
@@ -50,6 +49,11 @@ export function trigger(target, key) {
     if(!effect) {
       return;
     }
-    effect.run();
+    // const {scheduler} = effect.scheduler()
+    if(effect.scheduler) {
+      effect.scheduler();
+    } else {
+      effect.run();
+    }
   }
 }
