@@ -1,21 +1,51 @@
+import { extend } from "../shared";
+
 class ReactivityEffect {
   private _fn: Function;
-  constructor(fn, public scheduler?) {
+  deps: any[] = [];
+  activity = true;
+  onStop: Function | undefined;
+  public scheduler: Function | undefined;
+  constructor(fn) {
     this._fn = fn;
-    this.scheduler = scheduler;
   }
 
   run() {
     activityEffect = this;
-    return this._fn();
+    const result = this._fn()
+    return result;
   }
+
+  // 移除effect
+  stop() {
+    if(this.activity) {
+      cleanEffect(this);
+      this.activity = false;
+      if(this.onStop) this.onStop();
+    }
+  }
+}
+
+function cleanEffect(effect) {
+  effect.deps.forEach(dep => {
+    dep.delete(effect);
+  });
 }
 
 let activityEffect;
 export function effect(fn, option: any = {}) {
-  const _effect = new ReactivityEffect(fn, option?.scheduler);
+  const _effect = new ReactivityEffect(fn);
+  extend(_effect, option)
   _effect.run();
-  return _effect.run.bind(_effect);
+  const runner: any = _effect.run.bind(_effect);
+  runner.effect = _effect;
+  return runner;
+}
+
+// 开启stop后会删除effect
+// 但是可以运行runner
+export function stop(runner) {
+  runner.effect.stop();
 }
 
 // 收集依赖
@@ -37,7 +67,9 @@ export function track(target, key) {
     dep = new Set();
     depsMap.set(key, dep);
   }
+  if (!activityEffect) return;
   dep.add(activityEffect);
+  activityEffect.deps.push(dep);
 }
 
 // 触发依赖
@@ -45,12 +77,10 @@ export function track(target, key) {
 export function trigger(target, key) {
   const depsMap = targetMap.get(target);
   const dep = depsMap.get(key);
+  console.log('[trigger] dep.values()', dep.values());
+  
   for (const effect of dep) {
-    if(!effect) {
-      return;
-    }
-    // const {scheduler} = effect.scheduler()
-    if(effect.scheduler) {
+    if (effect.scheduler) {
       effect.scheduler();
     } else {
       effect.run();

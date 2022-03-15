@@ -1,5 +1,5 @@
 import { reactivity } from "../reactivity";
-import { effect } from "../effect";
+import { effect, stop } from "../effect";
 describe('effect', () => {
   it('直接执行一次effect的函数', () => {
     const fnSpy = jest.fn(() => { });
@@ -48,6 +48,37 @@ describe('effect', () => {
     expect(dummy).toBe(1);
     run();
     expect(dummy).toBe(2);
+  });
+  it('effect stop', () => {
+    let dummy = 0;
+    const foo = reactivity({
+      foo: 1
+    });
+    const runner = effect(() => {
+      dummy = foo.foo
+    });
+    foo.foo = 2;
+    expect(dummy).toBe(2);
+    stop(runner);
+    // foo.foo += 1;
+    foo.foo = 3
+    expect(dummy).toBe(2);
+    runner();
+    expect(dummy).toBe(3);
+  });
+  it('effect onStop', () => {
+    let dummy = 0;
+    const foo = reactivity({
+      foo: 1
+    });
+    const onStop = jest.fn();
+    const runner = effect(() => {
+      dummy = foo.foo
+    }, {
+      onStop
+    });
+    stop(runner);
+    expect(onStop).toBeCalledTimes(1);
   });
 
 });
