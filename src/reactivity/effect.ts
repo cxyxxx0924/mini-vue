@@ -1,5 +1,10 @@
 import { extend } from "../shared";
 
+let activityEffect: ReactivityEffect;
+let shouldTrack = true;
+
+let targetMap = new Map();
+
 class ReactivityEffect {
   private _fn: Function;
   deps: any[] = [];
@@ -11,17 +16,21 @@ class ReactivityEffect {
   }
 
   run() {
+    if(!this.activity) return this._fn();
+    shouldTrack = true;
     activityEffect = this;
-    const result = this._fn()
+    const result = this._fn();
+    shouldTrack = false;
+
     return result;
   }
 
   // 移除effect
   stop() {
-    if(this.activity) {
+    if (this.activity) {
       cleanEffect(this);
       this.activity = false;
-      if(this.onStop) this.onStop();
+      if (this.onStop) this.onStop();
     }
   }
 }
@@ -30,12 +39,12 @@ function cleanEffect(effect) {
   effect.deps.forEach(dep => {
     dep.delete(effect);
   });
+  effect.deps.length = 0;
 }
 
-let activityEffect;
 export function effect(fn, option: any = {}) {
   const _effect = new ReactivityEffect(fn);
-  extend(_effect, option)
+  extend(_effect, option);
   _effect.run();
   const runner: any = _effect.run.bind(_effect);
   runner.effect = _effect;
@@ -45,6 +54,7 @@ export function effect(fn, option: any = {}) {
 // 开启stop后会删除effect
 // 但是可以运行runner
 export function stop(runner) {
+  // shouldTrack = false;
   runner.effect.stop();
 }
 
@@ -54,9 +64,8 @@ export function stop(runner) {
 // 每个key会对应1个dep
 // dep下面会有n个effect，effect的数量取决于用户创建的数量
 // 但是每次执行get的时候都会执行dep.add，会有重复的effect被加入进来，所以用set数组
-let targetMap = new Map();
 export function track(target, key) {
-  // const dep = depsMap.get(key);
+  
   let depsMap = targetMap.get(target);
   if (!depsMap) {
     depsMap = new Map();
@@ -67,6 +76,8 @@ export function track(target, key) {
     dep = new Set();
     depsMap.set(key, dep);
   }
+
+  if (!shouldTrack) return;
   if (!activityEffect) return;
   dep.add(activityEffect);
   activityEffect.deps.push(dep);
@@ -78,7 +89,7 @@ export function trigger(target, key) {
   const depsMap = targetMap.get(target);
   const dep = depsMap.get(key);
   console.log('[trigger] dep.values()', dep.values());
-  
+
   for (const effect of dep) {
     if (effect.scheduler) {
       effect.scheduler();

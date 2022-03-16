@@ -1,4 +1,4 @@
-import { reactivity } from "../reactivity";
+import { reactive } from "../reactive";
 import { effect, stop } from "../effect";
 describe('effect', () => {
   it('直接执行一次effect的函数', () => {
@@ -7,7 +7,7 @@ describe('effect', () => {
     expect(fnSpy).toBeCalledTimes(1);
   });
   it('effect happy path', () => {
-    const user = reactivity({
+    const user = reactive({
       age: 10
     });
     let nextAge;
@@ -32,7 +32,7 @@ describe('effect', () => {
     // 如果加了scheduler，那么run方法就不执行
     let dummy = 0;
     let run;
-    const foo = reactivity({
+    const foo = reactive({
       foo: 1
     })
     const scheduler = jest.fn(() => {
@@ -51,7 +51,7 @@ describe('effect', () => {
   });
   it('effect stop', () => {
     let dummy = 0;
-    const foo = reactivity({
+    const foo = reactive({
       foo: 1
     });
     const runner = effect(() => {
@@ -60,15 +60,15 @@ describe('effect', () => {
     foo.foo = 2;
     expect(dummy).toBe(2);
     stop(runner);
-    // foo.foo += 1;
-    foo.foo = 3
+    foo.foo += 1;
+    // foo.foo = 3
     expect(dummy).toBe(2);
     runner();
     expect(dummy).toBe(3);
   });
   it('effect onStop', () => {
     let dummy = 0;
-    const foo = reactivity({
+    const foo = reactive({
       foo: 1
     });
     const onStop = jest.fn();
