@@ -1,9 +1,12 @@
 import { track, trigger } from "./effect";
-import { ReactiveEmuns } from "./reactive";
+import { reactive, ReactiveEmuns, readonly } from "./reactive";
 
 function createGetter(isReadonly = false) {
   return function get(target, key) {
     const ret = Reflect.get(target, key);
+    if(isObect(ret)) {
+      return isReadonly ? readonly(ret) : reactive(ret);
+    }
     if (!isReadonly) {
       track(target, key);
     }
@@ -17,6 +20,10 @@ function createSetter() {
       trigger(target, key);
       return ret;
   }
+}
+
+function isObect(val) {
+  return val !== null && typeof val === "object";
 }
 
 export function mutabelHandlers(raw) {

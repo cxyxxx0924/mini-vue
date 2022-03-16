@@ -17,5 +17,17 @@ describe('readonly', () => {
     const observer = readonly(foo);
     expect(isReadonly(observer)).toBeTruthy();
     expect(isReactive(observer)).toBeFalsy();
+  });
+  it('isReadonly 嵌套', () => {
+    const foo = {
+      foo: {
+        test: 1,
+        test1: 2,
+      }
+    }
+    const observer = readonly(foo);
+    expect(isReadonly(observer)).toBeTruthy();
+    expect(isReadonly(observer.foo)).toBeTruthy();
+
   })
 });

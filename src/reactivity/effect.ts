@@ -1,6 +1,6 @@
 import { extend } from "../shared";
 
-let activityEffect: ReactivityEffect;
+let activityEffect;
 let shouldTrack = true;
 
 let targetMap = new Map();
@@ -18,7 +18,7 @@ class ReactivityEffect {
   run() {
     if(!this.activity) return this._fn();
     shouldTrack = true;
-    activityEffect = this;
+    activityEffect = this as any;
     const result = this._fn();
     shouldTrack = false;
 
@@ -66,6 +66,8 @@ export function stop(runner) {
 // 但是每次执行get的时候都会执行dep.add，会有重复的effect被加入进来，所以用set数组
 export function track(target, key) {
   
+  if (!shouldTrack) return;
+
   let depsMap = targetMap.get(target);
   if (!depsMap) {
     depsMap = new Map();
@@ -77,8 +79,10 @@ export function track(target, key) {
     depsMap.set(key, dep);
   }
 
-  if (!shouldTrack) return;
   if (!activityEffect) return;
+
+
+  if(dep.has(activityEffect)) return;
   dep.add(activityEffect);
   activityEffect.deps.push(dep);
 }
