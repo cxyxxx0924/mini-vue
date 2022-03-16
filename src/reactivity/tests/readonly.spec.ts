@@ -28,6 +28,5 @@ describe('readonly', () => {
     const observer = readonly(foo);
     expect(isReadonly(observer)).toBeTruthy();
     expect(isReadonly(observer.foo)).toBeTruthy();
-
   })
 });

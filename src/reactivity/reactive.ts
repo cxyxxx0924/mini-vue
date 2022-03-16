@@ -1,8 +1,9 @@
-import { mutabelHandlers, readonlyHandlers } from "./baseHandler";
+import { mutabelHandlers, readonlyHandlers, shallowReadonlyHandlers } from "./baseHandler";
 
 export const enum ReactiveEmuns {
   IS_READONLY = '__v_isReadonly',
-  IS_REACTIVE = '__v_isReactivity'
+  IS_REACTIVE = '__v_isReactivity',
+  IS_SHALLOW_READONLY = '__v_is_shallowReadonly',
 }
 
 export function reactive(raw) {
@@ -15,6 +16,11 @@ export function readonly(raw) {
 
 function createReactiveObject(raw, baseHander) {
   return baseHander(raw);
+}
+
+export function shallowReadonly(raw) {
+  return createReactiveObject(raw, shallowReadonlyHandlers);
+  
 }
 
 export function isReadonly(observer) {
