@@ -1,10 +1,11 @@
-import { readonly, isReadonly, isReactive } from '../reactive'
+import { readonly, isReadonly, isReactive, isProxy } from '../reactive'
 describe('readonly', () => {
   it('happy path', () => {
     const foo = { foo: 1 };
     const observer = readonly(foo);
     expect(observer.foo).toBe(1);
     expect(observer).not.toBe(foo);
+    expect(isProxy(observer)).toBeTruthy();
   });
   it('修改readonly发出警告', () => {
     const observer = readonly({ foo: 1 });

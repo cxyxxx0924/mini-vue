@@ -1,7 +1,7 @@
 import { extend } from "../shared";
 
 let activityEffect;
-let shouldTrack = true;
+let shouldTrack;
 
 let targetMap = new Map();
 
@@ -16,9 +16,9 @@ class ReactivityEffect {
   }
 
   run() {
-    if(!this.activity) return this._fn();
+    if (!this.activity) return this._fn();
     shouldTrack = true;
-    activityEffect = this as any;
+    activityEffect = this;
     const result = this._fn();
     shouldTrack = false;
 
@@ -65,8 +65,8 @@ export function stop(runner) {
 // dep下面会有n个effect，effect的数量取决于用户创建的数量
 // 但是每次执行get的时候都会执行dep.add，会有重复的effect被加入进来，所以用set数组
 export function track(target, key) {
-  
-  if (!shouldTrack) return;
+
+  if (!isTracking()) return
 
   let depsMap = targetMap.get(target);
   if (!depsMap) {
@@ -79,21 +79,31 @@ export function track(target, key) {
     depsMap.set(key, dep);
   }
 
-  if (!activityEffect) return;
+  trackEffect(dep)
+}
 
-
-  if(dep.has(activityEffect)) return;
+export function trackEffect(dep) {
+  if (dep.has(activityEffect)) return;
   dep.add(activityEffect);
   activityEffect.deps.push(dep);
+}
+
+export function isTracking() {
+  // if (!shouldTrack) return;
+  // if (!activityEffect) return;
+  return shouldTrack && activityEffect !== undefined
 }
 
 // 触发依赖
 // 主要触发effect中的run方法，去触发effect
 export function trigger(target, key) {
   const depsMap = targetMap.get(target);
+  if (!depsMap) return;
   const dep = depsMap.get(key);
-  console.log('[trigger] dep.values()', dep.values());
+  triggerEffect(dep);
+}
 
+export function triggerEffect(dep) {
   for (const effect of dep) {
     if (effect.scheduler) {
       effect.scheduler();

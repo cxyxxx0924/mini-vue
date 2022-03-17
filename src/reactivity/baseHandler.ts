@@ -1,6 +1,6 @@
 import { track, trigger } from "./effect";
 import { reactive, ReactiveEmuns, readonly } from "./reactive";
-
+import { isObject } from '../shared'
 const get = createGetter();
 const set = createSetter();
 const readonlyGet = createGetter(true);
@@ -17,7 +17,7 @@ function createGetter(isReadonly = false, isShallowReadonly = false) {
     if (isShallowReadonly) {
       return ret;
     }
-    if (isObect(ret)) {
+    if (isObject(ret)) {
       return isReadonly ? readonly(ret) : reactive(ret);
     }
     if (!isReadonly) {
@@ -33,10 +33,6 @@ function createSetter() {
     trigger(target, key);
     return ret;
   }
-}
-
-function isObect(val) {
-  return val !== null && typeof val === "object";
 }
 
 export const mutabelHandlers = {

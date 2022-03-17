@@ -1,14 +1,15 @@
-import { isReactive, reactive } from '../reactive';
+import { isProxy, isReactive, reactive } from '../reactive';
 
 describe('reactive', () => {
   it('happy path', () => {
     const foo = { foo: 1 };
     const observer = reactive(foo);
-    expect(foo).not.toBe(observer);
+    expect(observer).not.toBe(foo);
     expect(isReactive(observer)).toBeTruthy()
     expect(observer.foo).toBe(1);
     observer.foo++;
     expect(observer.foo).toBe(2);
+    expect(isProxy(observer)).toBeTruthy();
   });
   it('嵌套的reactive', () => {
     const foo = {

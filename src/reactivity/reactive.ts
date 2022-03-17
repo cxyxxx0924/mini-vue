@@ -27,5 +27,8 @@ export function isReadonly(observer) {
 
 export function isReactive(observer) {
   return !!observer[ReactiveEmuns.IS_REACTIVE];
+}
 
+export function isProxy(value) {
+  return isReadonly(value) || isReactive(value)
 }

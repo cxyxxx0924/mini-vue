@@ -1,4 +1,4 @@
-import { isReactive, isReadonly, readonly, shallowReadonly } from "../reactive";
+import { isProxy, isReactive, isReadonly, readonly, shallowReadonly } from "../reactive";
 
 describe('shallowReadonly', () => {
   it('should not make non-reactive properties reactive ', () => {
@@ -6,6 +6,7 @@ describe('shallowReadonly', () => {
     expect(isReactive(props.n)).toBe(false);
     expect(isReadonly(props)).toBe(true);
     expect(isReadonly(props.n)).toBe(false);
+    expect(isProxy(props)).toBeTruthy();
   });
   it('should differentiate from normal readonly calls', () => {
     const original = { foo: {} };
