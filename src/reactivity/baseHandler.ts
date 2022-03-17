@@ -1,6 +1,7 @@
 import { track, trigger } from "./effect";
 import { reactive, ReactiveEmuns, readonly } from "./reactive";
 import { isObject } from '../shared'
+import { isRef, unRef } from "./ref";
 const get = createGetter();
 const set = createSetter();
 const readonlyGet = createGetter(true);
@@ -55,5 +56,19 @@ export const shallowReadonlyHandlers = {
     return true;
   }
 };
+
+export const proxyRefsHandlers = {
+  get(target, key) {
+    const ret = Reflect.get(target, key);
+    return unRef(ret);
+  },
+  set(target, key, value) {
+    if(!isRef(value) && isRef(target[key])) {
+      return (target[key].value = value);
+    } else {
+      return (target[key] = value);
+    }
+  }
+}
 
 

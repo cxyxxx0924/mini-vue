@@ -5,13 +5,13 @@ let shouldTrack;
 
 let targetMap = new Map();
 
-class ReactivityEffect {
+export class ReactivityEffect {
   private _fn: Function;
   deps: any[] = [];
   activity = true;
   onStop: Function | undefined;
-  public scheduler: Function | undefined;
-  constructor(fn) {
+  // public scheduler: Function | undefined;
+  constructor(fn, public scheduler?) {
     this._fn = fn;
   }
 
@@ -43,7 +43,7 @@ function cleanEffect(effect) {
 }
 
 export function effect(fn, option: any = {}) {
-  const _effect = new ReactivityEffect(fn);
+  const _effect = new ReactivityEffect(fn, option?.scheduler);
   extend(_effect, option);
   _effect.run();
   const runner: any = _effect.run.bind(_effect);
