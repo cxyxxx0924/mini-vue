@@ -71,6 +71,5 @@ describe('ref', () => {
     proxyUser.age = ref(30);
     expect(proxyUser.age).toBe(30);
     expect(user.age.value).toBe(30);
-
   })
 });
