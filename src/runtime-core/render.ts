@@ -6,7 +6,17 @@ export function render(vnode, container) {
 }
 
 function path(vnode: any, container: any) {
-  processComponent(vnode, container);
+  // processElement(vnode, container);
+  // processComponent(vnode, container);
+  if (typeof vnode.type === "object") {
+    processComponent(vnode, container);
+  } else if (typeof vnode.type === "string") {
+    processElement(vnode, container);
+  }
+}
+
+function processElement(vnode: any, container: any) {
+  
 }
 
 
@@ -23,8 +33,9 @@ function mountComponent(vnode, container) {
 }
 
 function setupRenderEffect(instance, container: any) {
-  const subtree = instance.render();
+  const subtree = instance.type.render();
 
   path(subtree, container)
 }
+
 
