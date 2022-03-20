@@ -11,9 +11,9 @@ describe('shallowReadonly', () => {
   it('should differentiate from normal readonly calls', () => {
     const original = { foo: {} };
     const shallowProxy = shallowReadonly(original);
-    const reactiveProxy = readonly(original);
-    expect(shallowProxy).not.toBe(reactiveProxy);
+    const readonlyProxy = readonly(original);
+    expect(shallowProxy).not.toBe(readonlyProxy);
     expect(isReadonly(shallowProxy.foo)).toBe(false);
-    expect(isReadonly(reactiveProxy.foo)).toBe(true);
+    expect(isReadonly(readonlyProxy.foo)).toBe(true);
   });
 });

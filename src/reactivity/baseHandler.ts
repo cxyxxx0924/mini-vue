@@ -57,7 +57,7 @@ export const shallowReadonlyHandlers = {
   }
 };
 
-export const proxyRefsHandlers = {
+export const proxyRefHandlers = {
   get(target, key) {
     const ret = Reflect.get(target, key);
     return unRef(ret);

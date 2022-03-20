@@ -1,5 +1,5 @@
 import { hasChange, isObject } from "../shared";
-import { proxyRefsHandlers } from "./baseHandler";
+import { proxyRefHandlers } from "./baseHandler";
 import { isTracking, trackEffect, triggerEffect } from "./effect";
 import { reactive } from "./reactive";
 
@@ -47,6 +47,6 @@ export function unRef(val) {
   return isRef(val) ? val.value : val;
 }
 
-export function proxyRefs(target) {
-  return new Proxy(target, proxyRefsHandlers)
+export function proxyRef(target) {
+  return new Proxy(target, proxyRefHandlers)
 }
