@@ -25,14 +25,14 @@ function mountElement(vnode: VNode, container) {
 
   const el = document.createElement(vnode.type);
   // children 分string 和array两种类型
-  if(typeof vnode.children === "string") {
+  if (typeof vnode.children === "string") {
     el.textContent = vnode.children;
-  } else if(Array.isArray(vnode.children)) {
+  } else if (Array.isArray(vnode.children)) {
     vnode.children.forEach(v => {
       path(v, el);
     });
   }
-  
+
   // props
   // el.setAttribute("id", "root");
   for (const key in vnode.props) {
@@ -42,20 +42,21 @@ function mountElement(vnode: VNode, container) {
   container.append(el);
 }
 // 处理 component类型
-function processComponent(vnode, container) {
-  mountComponent(vnode, container);
+function processComponent(initialVNode, container) {
+  mountComponent(initialVNode, container);
 
 }
 
-function mountComponent(vnode, container) {
-  const instance = createComponmentInstance(vnode);
+function mountComponent(initialVNode, container) {
+  const instance = createComponmentInstance(initialVNode);
   setupComponent(instance);
   setupRenderEffect(instance, container)
 }
 
 function setupRenderEffect(instance, container: any) {
-  const subtree = instance.type.render();
+  const { proxy } = instance;
 
+  const subtree = instance.type.render.call(proxy);
   path(subtree, container)
 }
 
