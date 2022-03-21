@@ -12,5 +12,6 @@ export function createVNode(type, props?, children?): VNode {
 export type VNode = {
   type: any,
   props: any,
-  children: any
+  children: any,
+  el?: any
 }

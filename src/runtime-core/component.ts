@@ -1,3 +1,4 @@
+import { ComponentPublicInstance } from './componentPublicInstance';
 
 
 export function createComponmentInstance(vnode) {
@@ -19,17 +20,8 @@ export function setupComponent(instance) {
 
 function setupStatefulComponent(instance) {
   const { setup } = instance.type;
-  instance.proxy = new Proxy({}, {
-    get(target, key) {
-      console.log('target', target);
-      console.log('key', key);
-      const { setupState } = instance
-      if (key in setupState) {
-        console.log('run here setupState', setupState)
-        return setupState[key]
-      }
-    }
-  });
+  const _ = instance
+  instance.proxy = new Proxy({_}, ComponentPublicInstance);
   if (setup) {
     const setupResult = setup();
     handleSetupResult(instance, setupResult);
@@ -48,8 +40,6 @@ function finishComponentSetup(instance) {
   const Component = instance.type;
   if (Component.render) {
     instance.type.render = Component.render;
-
-    // Component.render.call(proxy)
   }
 }
 

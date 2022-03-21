@@ -5,6 +5,7 @@ import { createComponmentInstance, setupComponent } from "./component";
 
 export function render(vnode: VNode, container) {
   path(vnode, container)
+
 }
 
 function path(vnode: VNode, container: any) {
@@ -18,12 +19,14 @@ function path(vnode: VNode, container: any) {
 }
 // 处理element类型
 function processElement(vnode: VNode, container: any) {
+  
   mountElement(vnode, container);
 }
 
 function mountElement(vnode: VNode, container) {
 
   const el = document.createElement(vnode.type);
+  vnode.el = el;
   // children 分string 和array两种类型
   if (typeof vnode.children === "string") {
     el.textContent = vnode.children;
@@ -42,22 +45,23 @@ function mountElement(vnode: VNode, container) {
   container.append(el);
 }
 // 处理 component类型
-function processComponent(initialVNode, container) {
-  mountComponent(initialVNode, container);
-
+function processComponent(vnode, container) {
+  mountComponent(vnode, container);
 }
 
-function mountComponent(initialVNode, container) {
-  const instance = createComponmentInstance(initialVNode);
+function mountComponent(vnode: VNode, container) {
+  const instance = createComponmentInstance(vnode);
+
   setupComponent(instance);
-  setupRenderEffect(instance, container)
+  setupRenderEffect(instance, vnode, container)
 }
 
-function setupRenderEffect(instance, container: any) {
+function setupRenderEffect(instance, vnode, container: any) {
   const { proxy } = instance;
 
   const subtree = instance.type.render.call(proxy);
-  path(subtree, container)
+  path(subtree, container);
+  vnode.el = subtree.el;
 }
 
 
