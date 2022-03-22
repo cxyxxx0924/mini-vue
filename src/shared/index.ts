@@ -19,3 +19,14 @@ export const isArray = value => {
 export const hasOwn = (states, key) => {
   return Object.prototype.hasOwnProperty.call(states, key);
 }
+
+const camelize = (str:string) => {
+  // const charAt0 = val.charAt(0).toLocaleUpperCase();
+  // return charAt0 + val.slice(1);
+  str = str.charAt(0).toUpperCase() + str.slice(1);
+  return str.replace(/-(\w)/g, (_, c) => (c ? c.toUpperCase() : ""));
+}
+
+export const handlerKey = (event: string) => {
+  return camelize(event) ? "on" + camelize(event) : "";
+} 

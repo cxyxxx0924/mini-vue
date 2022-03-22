@@ -4,12 +4,8 @@ window.self = null;
 export const App = {
   name: 'app',
   setup () {
-    const onAdd = () => {
-      console.log('call on add');
-    }
     return {
       name: 'mini-vue',
-      onAdd
     }
   },
 
