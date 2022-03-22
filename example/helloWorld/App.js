@@ -9,7 +9,13 @@ export const App = {
 
   render () {
     window.self = this;
-    return h('div', { class: ['red', 'hard'] }, 'hello ' + this.name
+    return h('div', 
+    { 
+      class: ['red', 'hard'], 
+      onClick: (() => console.log('onClick!')), 
+      onMousedown: (() => console.log('onMousedown!!!'))
+    },
+    'hello ' + this.name
       // [ h('p', {class: 'red'}, 'hi ' + this.name), h('p', {class: 'blue'}, 'mini-vue')] 
     )
   }

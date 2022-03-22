@@ -35,8 +35,13 @@ function mountElement(vnode: VNode, container) {
 
   // props
   // el.setAttribute("id", "root");
+  
   for (const key in vnode.props) {
-    const val = vnode.props[key]
+    const val = vnode.props[key];
+    const test = /^on[A-Z]/.test(key);
+    if(test) {
+      el.addEventListener(key.slice(2).toLocaleLowerCase(), val);
+    }
     el.setAttribute(key, val);
   }
   container.append(el);
