@@ -14,5 +14,8 @@ export const isString = value => {
 
 export const isArray = value => {
   return Array.isArray(value);
+}
 
+export const hasOwn = (states, key) => {
+  return Object.prototype.hasOwnProperty.call(states, key);
 }
