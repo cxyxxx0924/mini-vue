@@ -1,5 +1,5 @@
+import { shapeFlags } from './../shared/shapeFlags';
 import { VNode } from './vnode';
-import { isObject } from './../shared/index';
 import { createComponmentInstance, setupComponent } from "./component";
 
 
@@ -9,11 +9,9 @@ export function render(vnode: VNode, container) {
 }
 
 function path(vnode: VNode, container: any) {
-  // processElement(vnode, container);
-  // processComponent(vnode, container);
-  if (isObject(vnode.type)) {
+  if (vnode.shapeFlags & shapeFlags.COMPONENT) {
     processComponent(vnode, container);
-  } else if (typeof vnode.type === "string") {
+  } else if (vnode.shapeFlags & shapeFlags.ELEMENT) {
     processElement(vnode, container);
   }
 }
@@ -25,13 +23,12 @@ function processElement(vnode: VNode, container: any) {
 
 function mountElement(vnode: VNode, container) {
 
-  const el = document.createElement(vnode.type);
-  vnode.el = el;
-  // children 分string 和array两种类型
-  if (typeof vnode.children === "string") {
-    el.textContent = vnode.children;
-  } else if (Array.isArray(vnode.children)) {
-    vnode.children.forEach(v => {
+  const el = vnode.el = document.createElement(vnode.type);
+  // childrens 分string 和array两种类型
+  if (vnode.shapeFlags & shapeFlags.CHILDRENS_TEXT) {
+    el.textContent = vnode.childrens;
+  } else if (vnode.shapeFlags & shapeFlags.CHILDRENS_ARRAY) {
+    vnode.childrens.forEach(v => {
       path(v, el);
     });
   }

@@ -1,9 +1,24 @@
-export function createVNode(type, props?, children?): VNode {
+import { shapeFlags } from './../shared/shapeFlags';
+import { isObject, isString, isArray } from './../shared/index';
+export function createVNode(type, props?, childrens?): VNode {
 
   const vnode: VNode = {
     type,
     props,
-    children
+    childrens,
+    shapeFlags: 0,
+  }
+
+  if(isObject(type)) {
+    vnode.shapeFlags |= shapeFlags.COMPONENT;
+  } else if(isString(type)) {
+    vnode.shapeFlags |= shapeFlags.ELEMENT;
+  }
+
+  if(isString(childrens)) {
+    vnode.shapeFlags |= shapeFlags.CHILDRENS_TEXT;
+  } else if(isArray(childrens)) {
+    vnode.shapeFlags |= shapeFlags.CHILDRENS_ARRAY;
   }
 
   return vnode;
@@ -12,6 +27,7 @@ export function createVNode(type, props?, children?): VNode {
 export type VNode = {
   type: any,
   props: any,
-  children: any,
-  el?: any
+  childrens: any,
+  el?: any,
+  shapeFlags: number
 }
