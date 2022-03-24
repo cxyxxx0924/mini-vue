@@ -4,7 +4,7 @@ import { initProps } from './componentProps';
 import { ComponentPublicInstance } from './componentPublicInstance';
 import { initSlots } from './componentSlots';
 
-
+let currentInstance;
 export function createComponmentInstance(vnode) {
   const component = {
     vnode,
@@ -29,11 +29,13 @@ function setupStatefulComponent(instance) {
   const _ = instance;
   instance.proxy = new Proxy({ _ }, ComponentPublicInstance);
   if (setup) {
+    setCurrentInstance(instance);
     const setupResult = setup(shallowReadonly(instance.props), { emit: instance.emit });
     handleSetupResult(instance, setupResult);
   }
-
+  setCurrentInstance(null);
 }
+
 function handleSetupResult(instance, setupResult: any) {
   if (typeof setupResult === "object") {
     instance.setupState = setupResult;
@@ -49,3 +51,10 @@ function finishComponentSetup(instance) {
   }
 }
 
+export function getCurrentInstance() {
+  return currentInstance;
+}
+
+function setCurrentInstance(instance) {
+  currentInstance = instance;
+}
