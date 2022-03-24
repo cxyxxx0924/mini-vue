@@ -1,8 +1,8 @@
-import { createVNode } from "../vnode";
+import { createVNode, FRAGMENT } from "../vnode";
 
 export function renderSlots(slots, key, params) {
   const slot = slots[key];
   if(typeof slot === 'function') {
-    return createVNode("div", {}, slot(params));
+    return createVNode(FRAGMENT, {}, slot(params));
   }
 }
