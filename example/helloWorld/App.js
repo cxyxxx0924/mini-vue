@@ -11,20 +11,20 @@ export const App = {
 
   render () {
     window.self = this;
-    return h('div', 
-    { 
-      class: ['red', 'hard'], 
-      onClick: (() => console.log('onClick!')), 
-      onMousedown: (() => console.log('onMousedown!!!')),
-      onAdd: (() => {
-        console.log('call onAdd!')
-      })
-    },
-    // 'hello ' + this.name
-      [ h('p', {class: 'red'}, 'hi ' + this.name), h(Foo, {
+    return h('div',
+      {
+        class: ['red', 'hard'],
+        onClick: (() => console.log('onClick!')),
+        onMousedown: (() => console.log('onMousedown!!!')),
+        onAdd: (() => {
+          console.log('call onAdd!')
+        })
+      },
+      // 'hello ' + this.name
+      [h('p', { class: 'red' }, 'hi ' + this.name), h(Foo, {
         msg: "我是props",
         count: 1,
-      })] 
+      })]
     )
   }
 }

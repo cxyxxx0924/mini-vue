@@ -2,14 +2,14 @@ import { shapeFlags } from './../shared/shapeFlags';
 import { FRAGMENT, TEXT, VNode } from './vnode';
 import { createComponmentInstance, setupComponent } from "./component";
 
-export function render(vnode: VNode, container) {
-  path(vnode, container);
+export function render(vnode: VNode, container, parentInstance) {
+  path(vnode, container, parentInstance);
 }
 
-function path(vnode: VNode, container: any) {
+function path(vnode: VNode, container: any, parentInstance) {
   switch (vnode.type) {
     case FRAGMENT:
-      processFragment(vnode, container);
+      processFragment(vnode, container, parentInstance);
       break;
     
     case TEXT:
@@ -18,26 +18,26 @@ function path(vnode: VNode, container: any) {
   
     default:
       if (vnode.shapeFlags & shapeFlags.COMPONENT) {
-        processComponent(vnode, container);
+        processComponent(vnode, container, parentInstance);
       } else if (vnode.shapeFlags & shapeFlags.ELEMENT) {
-        processElement(vnode, container);
+        processElement(vnode, container, parentInstance);
       }
       break;
   }
   
 }
 // 处理element类型
-function processElement(vnode: VNode, container: any) {
-  mountElement(vnode, container);
+function processElement(vnode: VNode, container: any, parentInstance) {
+  mountElement(vnode, container, parentInstance);
 }
 
-function mountElement(vnode: VNode, container) {
+function mountElement(vnode: VNode, container, parentInstance) {
   const el = vnode.el = document.createElement(vnode.type);
   // childrens 分string 和array两种类型
   if (vnode.shapeFlags & shapeFlags.CHILDRENS_TEXT) {
     el.textContent = vnode.childrens;
   } else if (vnode.shapeFlags & shapeFlags.CHILDRENS_ARRAY) {
-    mountChildren(vnode.childrens, el)
+    mountChildren(vnode.childrens, el, parentInstance)
   }
   addEventListener(el, vnode.props);
   container.append(el);
@@ -55,12 +55,12 @@ function addEventListener(el, props) {
 }
 
 // 处理 component类型
-function processComponent(vnode, container) {
-  mountComponent(vnode, container);
+function processComponent(vnode, container, parentInstance) {
+  mountComponent(vnode, container, parentInstance);
 }
 
-function mountComponent(vnode: VNode, container) {
-  const instance = createComponmentInstance(vnode);
+function mountComponent(vnode: VNode, container, parentInstance) {
+  const instance = createComponmentInstance(vnode, parentInstance);
 
   setupComponent(instance);
   setupRenderEffect(instance, vnode, container)
@@ -70,17 +70,17 @@ function setupRenderEffect(instance, vnode, container: any) {
   const { proxy } = instance;
 
   const subtree = instance.type.render.call(proxy);
-  path(subtree, container);
+  path(subtree, container, instance);
   vnode.el = subtree.el;
 }
 
-function processFragment(vnode: VNode, container: any) {
-  mountChildren(vnode.childrens, container);
+function processFragment(vnode: VNode, container: any, parentInstance) {
+  mountChildren(vnode.childrens, container, parentInstance);
 }
 
-function mountChildren(childrens, container) {
+function mountChildren(childrens, container, parentInstance) {
   childrens.forEach(v => {
-    path(v, container);
+    path(v, container, parentInstance);
   });
 }
 

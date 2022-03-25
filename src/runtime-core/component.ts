@@ -5,7 +5,7 @@ import { ComponentPublicInstance } from './componentPublicInstance';
 import { initSlots } from './componentSlots';
 
 let currentInstance;
-export function createComponmentInstance(vnode) {
+export function createComponmentInstance(vnode, parentInstance) {
   const component = {
     vnode,
     type: vnode.type,
@@ -13,7 +13,11 @@ export function createComponmentInstance(vnode) {
     props: {},
     emit: () => { },
     slots: {},
+    provides: {},
+    parent: parentInstance,
   }
+  // provides这样写也没有问题，
+  component.provides = component.parent ? Object.create(component.parent.provides) : {};
   component.emit = emit.bind(null, component) as any;
   return component;
 }
