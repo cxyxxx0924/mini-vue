@@ -13,10 +13,10 @@ export function createComponmentInstance(vnode, parentInstance) {
     props: {},
     emit: () => { },
     slots: {},
+    // provides: parentInstance ? parentInstance.provides : {},
     provides: {},
     parent: parentInstance,
   }
-  // provides这样写也没有问题，
   component.provides = component.parent ? Object.create(component.parent.provides) : {};
   component.emit = emit.bind(null, component) as any;
   return component;
