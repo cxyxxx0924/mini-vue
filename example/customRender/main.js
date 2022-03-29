@@ -9,7 +9,6 @@ const game = new PIXI.Application({
 
 const renderer = createRenderer({
   createElement (type) {
-    debugger
     if (type === "react") {
       const react = new PIXI.Graphics()
       react.beginFill(0xff0000)

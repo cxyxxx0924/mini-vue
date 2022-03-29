@@ -1,18 +1,24 @@
 import { createRenderer } from '../runtime-core'
 
 function createElement(type) {
-  
+
   const el = document.createElement(type);
   return el;
 }
 
-function patchProps(el, key, value) {
-
-  const test = /^on[A-Z]/.test(key);
-  if (test) {
-    el.addEventListener(key.slice(2).toLocaleLowerCase(), value);
+function patchProps(el, key, oldVal, nextVal) {
+  if (oldVal !== nextVal) {
+    const test = /^on[A-Z]/.test(key);
+    if (test) {
+      el.addEventListener(key.slice(2).toLocaleLowerCase(), nextVal);
+    }
+    if (nextVal === null || nextVal === undefined) {
+      // el.reAttribute(key, nextVal);
+      el.removeAttribute(key);
+    } else {
+      el.setAttribute(key, nextVal);
+    }
   }
-  el.setAttribute(key, value);
 }
 
 function insert(parent, el) {

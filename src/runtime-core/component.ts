@@ -1,5 +1,6 @@
 import { proxyRef } from '../reactivity';
 import { shallowReadonly } from '../reactivity/reactive';
+import { EMPTY_OBJ } from '../shared';
 import { emit } from './componentEmit';
 import { initProps } from './componentProps';
 import { ComponentPublicInstance } from './componentPublicInstance';
@@ -11,7 +12,7 @@ export function createComponmentInstance(vnode, parentInstance) {
     vnode,
     type: vnode.type,
     setupState: {},
-    props: {},
+    props: EMPTY_OBJ,
     emit: () => { },
     slots: {},
     isMounted: false,

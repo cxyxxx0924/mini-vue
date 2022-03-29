@@ -3,6 +3,7 @@ import { FRAGMENT, TEXT, VNode } from './vnode';
 import { createComponmentInstance, setupComponent } from "./component";
 import { createAppApi } from './createApp';
 import { effect } from '../reactivity/effect';
+import { EMPTY_OBJ } from '../shared';
 
 export function createRenderer(options) {
   const { createElement: hostCreateElement, insert: hostInsert, patchProps: hostPatchProps } = options;
@@ -36,15 +37,38 @@ export function createRenderer(options) {
     if (!n1) {
       mountElement(n1, n2, container, parentInstance);
     } else {
-      patchElement(n1,n2,container);
+      patchElement(n1, n2, container);
     }
   }
 
-  function patchElement(n1,n2,container) {
+  function patchElement(n1, n2, container) {
     console.log('patchElement');
-    
+
     console.log('n1', n1);
     console.log('n2', n2);
+    const el = (n2.el = n1.el);
+    const prevProps = n1.props;
+    const nextProps = n2.props;
+
+    patchProps(el, prevProps, nextProps);
+  }
+
+  function patchProps(el, oldProps, newProps) {
+
+    for (const key in newProps) {
+      const oldProp = oldProps[key];
+      const nextProp = newProps[key];
+      if (nextProp !== oldProp) {
+        hostPatchProps(el, key, oldProp, nextProp)
+      }
+    }
+    if(oldProps !== EMPTY_OBJ) {
+      for (const key in oldProps) {
+        if (!(key in newProps)) {
+          hostPatchProps(el, key, oldProps[key], null)
+        }
+      }
+    }
   }
 
   function mountElement(n1, n2: VNode, container, parentInstance) {
@@ -65,7 +89,7 @@ export function createRenderer(options) {
   function addEventListener(el, props) {
     for (const key in props) {
       const value = props[key]
-      hostPatchProps(el, key, value);
+      hostPatchProps(el, key, null, value);
     }
   }
 
