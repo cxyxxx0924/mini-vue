@@ -1,11 +1,13 @@
 import { createRenderer } from '../runtime-core'
 
 function createElement(type) {
+  
   const el = document.createElement(type);
   return el;
 }
 
 function patchProps(el, key, value) {
+
   const test = /^on[A-Z]/.test(key);
   if (test) {
     el.addEventListener(key.slice(2).toLocaleLowerCase(), value);
@@ -14,6 +16,7 @@ function patchProps(el, key, value) {
 }
 
 function insert(parent, el) {
+
   // name
   parent.append(el);
 }
