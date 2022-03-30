@@ -12,7 +12,7 @@ export function createVNode(type, props?, childrens?): VNode {
     childrens,
     shapeFlags: 0,
   }
-
+  
   if (isObject(type)) {
     vnode.shapeFlags |= shapeFlags.COMPONENT;
   } else if (isString(type)) {

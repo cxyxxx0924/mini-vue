@@ -27,8 +27,21 @@ function insert(parent, el) {
   parent.append(el);
 }
 
+function remove(children) {
+  const parentVNode = children.parentNode;
+  if(parentVNode) {
+    parentVNode.removeChild(children)
+  }
+}
+
+function setElementText(el, text) {
+  console.log('text', text);
+  
+  el.textContent = text;
+}
+
 const renderer: any = createRenderer({
-  createElement, patchProps, insert
+  createElement, patchProps, insert, remove, setElementText
 })
 
 export function createApp(...args) {

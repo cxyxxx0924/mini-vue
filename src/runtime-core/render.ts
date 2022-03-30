@@ -6,7 +6,13 @@ import { effect } from '../reactivity/effect';
 import { EMPTY_OBJ } from '../shared';
 
 export function createRenderer(options) {
-  const { createElement: hostCreateElement, insert: hostInsert, patchProps: hostPatchProps } = options;
+  const {
+    createElement: hostCreateElement,
+    insert: hostInsert,
+    patchProps: hostPatchProps,
+    remove: hostRemove,
+    setElementText: hostSetElementText
+  } = options;
 
   function render(n2: VNode, container, parentInstance) {
     path(null, n2, container, parentInstance);
@@ -37,38 +43,69 @@ export function createRenderer(options) {
     if (!n1) {
       mountElement(n1, n2, container, parentInstance);
     } else {
-      patchElement(n1, n2, container);
+      patchElement(n1, n2, container, parentInstance);
     }
   }
 
-  function patchElement(n1, n2, container) {
+  function patchElement(n1, n2, container, parentInstance) {
     console.log('patchElement');
 
-    console.log('n1', n1);
-    console.log('n2', n2);
     const el = (n2.el = n1.el);
-    const prevProps = n1.props;
-    const nextProps = n2.props;
 
-    patchProps(el, prevProps, nextProps);
+
+    patchProps(el, n1, n1);
+    patchChildrens(n1, n2, el, parentInstance);
   }
 
-  function patchProps(el, oldProps, newProps) {
-
-    for (const key in newProps) {
-      const oldProp = oldProps[key];
-      const nextProp = newProps[key];
+  function patchProps(el, n1, n2) {
+    const prevProps = n1.props;
+    const nextProps = n2.props;
+    for (const key in nextProps) {
+      const oldProp = prevProps[key];
+      const nextProp = nextProps[key];
       if (nextProp !== oldProp) {
         hostPatchProps(el, key, oldProp, nextProp)
       }
     }
-    if(oldProps !== EMPTY_OBJ) {
-      for (const key in oldProps) {
-        if (!(key in newProps)) {
-          hostPatchProps(el, key, oldProps[key], null)
+    if (prevProps !== EMPTY_OBJ) {
+      for (const key in prevProps) {
+        if (!(key in nextProps)) {
+          hostPatchProps(el, key, prevProps[key], null)
         }
       }
     }
+  }
+
+  function patchChildrens(n1, n2, container, parentInstance) {
+    const newShapeFlage = n2.shapeFlags;
+    const oldShapeFlage = n1.shapeFlags;
+    if (newShapeFlage & shapeFlags.CHILDRENS_TEXT) {
+      if (oldShapeFlage & shapeFlags.CHILDRENS_ARRAY) {
+        unmountChildrens(n1.childrens);
+      } 
+      if(n1.childrens !== n2.childrens) {
+        hostSetElementText(container, n2.childrens);
+      }
+    } else {
+      if(oldShapeFlage & shapeFlags.CHILDRENS_TEXT) {
+        // hostRemove(el);
+        // console.log(n1.childrens);
+        hostSetElementText(container, "");
+        mountChildren(n2.childrens, container, parentInstance)
+        
+      }
+    }
+    
+    // console.log('n1', n1);
+    // console.log('n2', n2);
+  }
+
+  function unmountChildrens(childrens) {
+    for (let i = 0; i < childrens.length; i++) {
+      const el = childrens[i].el;
+      hostRemove(el);
+    }
+
   }
 
   function mountElement(n1, n2: VNode, container, parentInstance) {
