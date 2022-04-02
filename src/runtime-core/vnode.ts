@@ -11,6 +11,7 @@ export function createVNode(type, props?, childrens?): VNode {
     props,
     childrens,
     shapeFlags: 0,
+    key: props && props.key
   }
   
   if (isObject(type)) {
@@ -47,4 +48,5 @@ export type VNode = {
   childrens: any,
   el?: any,
   shapeFlags: number,
+  key: any
 }

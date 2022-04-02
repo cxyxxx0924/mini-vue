@@ -21,10 +21,10 @@ function patchProps(el, key, oldVal, nextVal) {
   }
 }
 
-function insert(parent, el) {
+function insert(parent, children, anchor) {
 
   // name
-  parent.append(el);
+  parent.insertBefore(children, anchor || null);
 }
 
 function remove(children) {
