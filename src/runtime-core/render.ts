@@ -167,27 +167,67 @@ export function createRenderer(options) {
       // console.log("i is ", i);
       let s1 = i;
       let s2 = i;
+      // 删除新节点中没有的元素
       const patchedLength = e2 - s2 + 1;
       let patched = 0;
+      // 移动
+      const newIndexToOldIndexMap = new Array(patchedLength);
+      // 初始化最长递增子序列
+      for (let i = 0; i < patchedLength; i++) {
+        newIndexToOldIndexMap[i] = 0;
+      }
+
       const newPatchMap = new Map();
       for (let s2i = s2; s2i <= e2; s2i++) {
         const s2Child = c2[s2i];
-        newPatchMap.set(s2Child.key, s2Child);
+        newPatchMap.set(s2Child.key, s2i);
       }
+
+      let needMove = false;
+      let maxSoFar = 0;
 
       for (let s1i = s1; s1i <= e1; s1i++) {
         const prevChild = c1[s1i];
         if (patched >= patchedLength) {
           hostRemove(prevChild.el);
-          continue;
         }
-        debugger;
-        const s2Child = newPatchMap.get(prevChild.key);
-        if (s2Child) {
-          path(prevChild, s2Child, container, parentInstance, null);
-          patched++;
-        } else {
+
+        const s2index = newPatchMap.get(prevChild.key);
+        if (s2index === undefined) {
           hostRemove(prevChild.el);
+        } else {
+          if (isSomeVNodeType(prevChild, c2[s2index])) {
+            path(prevChild, c2[s2index], container, parentInstance, null);
+            patched++;
+
+            newIndexToOldIndexMap[s2index - s2] = s1i + 1;
+            if (s2index - s2 > maxSoFar) {
+              maxSoFar = s2index - s2;
+            } else {
+              needMove = true;
+            }
+          }
+        }
+      }
+      console.log("newIndexToOldIndexMap", newIndexToOldIndexMap);
+      const increasingNewIndexSequence = needMove
+        ? getSequence(newIndexToOldIndexMap)
+        : [];
+      let j = increasingNewIndexSequence.length - 1;
+      for (let i = patched - 1; i >= 0; i--) {
+        const nextIndex = i + s2;
+        const nextChild = c2[nextIndex];
+        const anchor = nextIndex + 1 < l2 ? c2[nextIndex + 1].el : null;
+        if (newIndexToOldIndexMap[i] === 0) {
+          // 插入
+          path(null, nextChild, container, parentInstance, anchor);
+        } else if (needMove) {
+          if (j < 0 || increasingNewIndexSequence[j] !== i) {
+            console.log("移动位置");
+            hostInsert(container, nextChild.el, anchor);
+          } else {
+            j--;
+          }
         }
       }
     }
@@ -279,4 +319,46 @@ export function createRenderer(options) {
   return {
     createApp: createAppApi(render),
   };
+}
+
+// 最迟递增子序列
+function getSequence(arr: number[]): number[] {
+  const p = arr.slice();
+  const result = [0];
+  let i, j, u, v, c;
+  const len = arr.length;
+  for (i = 0; i < len; i++) {
+    const arrI = arr[i];
+    if (arrI !== 0) {
+      j = result[result.length - 1];
+      if (arr[j] < arrI) {
+        p[i] = j;
+        result.push(i);
+        continue;
+      }
+      u = 0;
+      v = result.length - 1;
+      while (u < v) {
+        c = (u + v) >> 1;
+        if (arr[result[c]] < arrI) {
+          u = c + 1;
+        } else {
+          v = c;
+        }
+      }
+      if (arrI < arr[result[u]]) {
+        if (u > 0) {
+          p[i] = result[u - 1];
+        }
+        result[u] = i;
+      }
+    }
+  }
+  u = result.length;
+  v = result[u - 1];
+  while (u-- > 0) {
+    result[u] = v;
+    v = p[v];
+  }
+  return result;
 }
