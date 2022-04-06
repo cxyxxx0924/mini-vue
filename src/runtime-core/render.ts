@@ -214,10 +214,13 @@ export function createRenderer(options) {
         ? getSequence(newIndexToOldIndexMap)
         : [];
       let j = increasingNewIndexSequence.length - 1;
-      for (let i = patched - 1; i >= 0; i--) {
+      for (let i = patched; i >= 0; i--) {
         const nextIndex = i + s2;
         const nextChild = c2[nextIndex];
         const anchor = nextIndex + 1 < l2 ? c2[nextIndex + 1].el : null;
+        console.log("newIndexToOldIndexMap[i]", newIndexToOldIndexMap[i]);
+        console.log("[i]", i);
+
         if (newIndexToOldIndexMap[i] === 0) {
           // 插入
           path(null, nextChild, container, parentInstance, anchor);
