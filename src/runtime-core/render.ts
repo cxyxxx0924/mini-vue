@@ -4,6 +4,7 @@ import { createComponmentInstance, setupComponent } from "./component";
 import { createAppApi } from "./createApp";
 import { effect } from "../reactivity/effect";
 import { EMPTY_OBJ } from "../shared";
+import { shouldUpdateComponent } from "./componentUpdateUtils";
 
 export function createRenderer(options) {
   const {
@@ -266,35 +267,65 @@ export function createRenderer(options) {
 
   // 处理 component类型
   function processComponent(n1, n2, container, parentInstance, anchor) {
-    mountComponent(n1, n2, container, parentInstance, anchor);
+    if (!n1) {
+      mountComponent(n2, container, parentInstance, anchor);
+    } else {
+      // console.log("update mount");
+      updateComponent(n1, n2);
+    }
   }
 
-  function mountComponent(n1, n2: VNode, container, parentInstance, anchor) {
-    const instance = createComponmentInstance(n2, parentInstance);
+  function mountComponent(initVNode: VNode, container, parentInstance, anchor) {
+    const instance = (initVNode.component = createComponmentInstance(
+      initVNode,
+      parentInstance
+    ));
 
     setupComponent(instance);
-    setupRenderEffect(instance, n1, n2, container, anchor);
+    setupRenderEffect(instance, initVNode, container, anchor);
   }
 
-  function setupRenderEffect(instance, n1, n2, container: any, anchor) {
-    effect(() => {
+  function updateComponent(n1, n2) {
+    const instance = (n2.component = n1.component);
+    if (shouldUpdateComponent(n1, n2)) {
+      instance.next = n2;
+      instance.update();
+    } else {
+      n2.el = n1.el;
+      n2.vnode = n2;
+    }
+  }
+
+  function setupRenderEffect(instance, initVNode, container: any, anchor) {
+    instance.update = effect(() => {
       if (!instance.isMounted) {
         const { proxy } = instance;
         const subtree = instance.type.render.call(proxy);
-        console.log("init");
         instance.prevSubtree = subtree;
-        n2.el = subtree.el;
+        initVNode.el = subtree.el;
         path(null, subtree, container, instance, anchor);
         instance.isMounted = true;
       } else {
+        const { next, vnode } = instance;
+        if (next) {
+          next.el = vnode.el;
+          updateComponentPreRender(instance, next);
+        }
+
         const { proxy } = instance;
         const subtree = instance.type.render.call(proxy);
-        console.log("update");
         const prevSubtree = instance.prevSubtree;
         instance.prevSubtree = subtree;
         path(prevSubtree, subtree, container, instance, anchor);
       }
     });
+  }
+
+  function updateComponentPreRender(instance, nextVNode) {
+    instance.vnode = nextVNode;
+    instance.next = null;
+
+    instance.props = nextVNode.props;
   }
 
   function processFragment(
@@ -304,7 +335,9 @@ export function createRenderer(options) {
     parentInstance,
     anchor
   ) {
-    mountChildren(n2.childrens, container, parentInstance, anchor);
+    if (!n1) {
+      mountChildren(n2.childrens, container, parentInstance, anchor);
+    }
   }
 
   function mountChildren(childrens, container, parentInstance, anchor) {

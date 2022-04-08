@@ -1,19 +1,19 @@
-import { shapeFlags } from './../shared/shapeFlags';
-import { isObject, isString, isArray } from './../shared/index';
+import { shapeFlags } from "./../shared/shapeFlags";
+import { isObject, isString, isArray } from "./../shared/index";
 
 export const FRAGMENT = Symbol("FRAGMENT");
 export const TEXT = Symbol("TEXT");
 
 export function createVNode(type, props?, childrens?): VNode {
-
   const vnode: VNode = {
     type,
     props,
     childrens,
     shapeFlags: 0,
-    key: props && props.key
-  }
-  
+    key: props && props.key,
+    component: null,
+  };
+
   if (isObject(type)) {
     vnode.shapeFlags |= shapeFlags.COMPONENT;
   } else if (isString(type)) {
@@ -36,17 +36,20 @@ export function createVNode(type, props?, childrens?): VNode {
 
 export function createTextVNode(text) {
   const textVNode = {
-    type: TEXT, props: {}, childrens: text, 
-  }
+    type: TEXT,
+    props: {},
+    childrens: text,
+  };
 
   return textVNode;
 }
 
 export type VNode = {
-  type: any,
-  props: any,
-  childrens: any,
-  el?: any,
-  shapeFlags: number,
-  key: any
-}
+  type: any;
+  props: any;
+  childrens: any;
+  el?: any;
+  shapeFlags: number;
+  key: any;
+  component: any;
+};
