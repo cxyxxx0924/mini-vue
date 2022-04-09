@@ -5,6 +5,7 @@ import { createAppApi } from "./createApp";
 import { effect } from "../reactivity/effect";
 import { EMPTY_OBJ } from "../shared";
 import { shouldUpdateComponent } from "./componentUpdateUtils";
+import { queneJob } from "./scheduler";
 
 export function createRenderer(options) {
   const {
@@ -297,28 +298,36 @@ export function createRenderer(options) {
   }
 
   function setupRenderEffect(instance, initVNode, container: any, anchor) {
-    instance.update = effect(() => {
-      if (!instance.isMounted) {
-        const { proxy } = instance;
-        const subtree = instance.type.render.call(proxy);
-        instance.prevSubtree = subtree;
-        initVNode.el = subtree.el;
-        path(null, subtree, container, instance, anchor);
-        instance.isMounted = true;
-      } else {
-        const { next, vnode } = instance;
-        if (next) {
-          next.el = vnode.el;
-          updateComponentPreRender(instance, next);
-        }
+    instance.update = effect(
+      () => {
+        if (!instance.isMounted) {
+          const { proxy } = instance;
+          const subtree = instance.type.render.call(proxy);
+          instance.prevSubtree = subtree;
+          initVNode.el = subtree.el;
+          path(null, subtree, container, instance, anchor);
+          instance.isMounted = true;
+        } else {
+          const { next, vnode } = instance;
+          if (next) {
+            next.el = vnode.el;
+            updateComponentPreRender(instance, next);
+          }
 
-        const { proxy } = instance;
-        const subtree = instance.type.render.call(proxy);
-        const prevSubtree = instance.prevSubtree;
-        instance.prevSubtree = subtree;
-        path(prevSubtree, subtree, container, instance, anchor);
+          const { proxy } = instance;
+          const subtree = instance.type.render.call(proxy);
+          const prevSubtree = instance.prevSubtree;
+          instance.prevSubtree = subtree;
+          path(prevSubtree, subtree, container, instance, anchor);
+        }
+      },
+      {
+        scheduler: () => {
+          console.log("run scheduler");
+          queneJob(instance.update);
+        },
       }
-    });
+    );
   }
 
   function updateComponentPreRender(instance, nextVNode) {
