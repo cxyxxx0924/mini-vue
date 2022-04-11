@@ -20,6 +20,8 @@ function parseChildren(context) {
     if (/[a-z]/i.test(context.source[1])) {
       node = parseElement(context);
     }
+  } else {
+    node = parseText(context);
   }
   nodes.push(node);
   return nodes;
@@ -43,12 +45,15 @@ function parseInterpolation(context) {
     closeDelimiter,
     openDelimiter.length
   );
-  // context.source = context.source.slice(openDelimiter.length);
   advanceBy(context, openDelimiter.length);
   const contentLength = closeIndex - openDelimiter.length;
-  const rawContent = context.source.slice(0, contentLength);
+  // const rawContent = context.source.slice(0, contentLength);
+  // advanceBy(context, closeIndex);
+  const rawContent = parseData(context, contentLength);
   const content = rawContent.trim();
   advanceBy(context, closeIndex);
+
+  console.log("context", context.source);
 
   return {
     type: NodeTypes.INTERPOLATION,
@@ -63,6 +68,20 @@ function parseElement(context) {
   const element = parseTag(context, TagType.TAG_START);
   parseTag(context, TagType.TAG_END);
   return element;
+}
+
+function parseText(context) {
+  const content = parseData(context, context.source.length);
+  return {
+    type: NodeTypes.TEXT,
+    content: content,
+  };
+}
+
+function parseData(context: any, length) {
+  const content = context.source.slice(0, length);
+  advanceBy(context, length);
+  return content;
 }
 
 function parseTag(context: any, type: TagType) {
@@ -81,7 +100,5 @@ function parseTag(context: any, type: TagType) {
 }
 
 function advanceBy(context, length) {
-  // console.log();
-
   context.source = context.source.slice(length);
 }
